@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/close-button1.png</file>
+        <file>res/close-button2.png</file>
+        <file>res/maximize-button1.png</file>
+        <file>res/maximize-button2.png</file>
+        <file>res/minimize-button1.png</file>
+        <file>res/background.png</file>
+        <file>qml/main.qml</file>
+    </qresource>
+</RCC>
