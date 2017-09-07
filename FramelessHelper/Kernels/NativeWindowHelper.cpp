@@ -116,8 +116,11 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
         lpMMInfo->ptMaxPosition.y =  top;
         lpMMInfo->ptMaxSize.x = right - left + 1;
         lpMMInfo->ptMaxSize.y = bottom - top + 1;
-        lpMMInfo->ptMaxTrackSize.x = right - left + 1;
-        lpMMInfo->ptMaxTrackSize.y = bottom - top + 1;
+
+        lpMMInfo->ptMinTrackSize.x = d->window->minimumWidth();
+        lpMMInfo->ptMinTrackSize.y = d->window->minimumHeight();
+        lpMMInfo->ptMaxTrackSize.x = d->window->maximumWidth();
+        lpMMInfo->ptMaxTrackSize.y = d->window->maximumHeight();
 
         *result = 0;
         return true;
