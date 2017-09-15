@@ -8,6 +8,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent, Qt::FramelessWindowHint)
     , ui(new Ui::MainWindow())
+    , window(Q_NULLPTR)
 {
     ui->setupUi(this);
 
@@ -57,4 +58,10 @@ void MainWindow::maximizeButtonClicked()
     } else {
         showMaximized();
     }
+}
+
+void MainWindow::on_openWindow_clicked()
+{
+    if (window)
+        window->show();
 }
