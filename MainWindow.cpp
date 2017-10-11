@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     auto helper = new FramelessHelper(this);
     helper->setDraggableMargins(3, 3, 3, 3);
-    helper->setMaximizedMargins(0, 0, 0, 0);
+    helper->setMaximizedMargins(3, 3, 3, 3);
     helper->setTitleBarHeight(32);
 
     connect(ui->maximizeButton, &QPushButton::clicked,
@@ -33,7 +33,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     QImage backgroundImage(QStringLiteral(":/res/background.png"));
-    painter.drawImage(rect(), backgroundImage);
+    painter.drawImage(contentsRect(), backgroundImage);
 }
 
 bool MainWindow::event(QEvent *event)

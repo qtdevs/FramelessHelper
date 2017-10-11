@@ -1,6 +1,8 @@
 #include "FramelessHelper.h"
 #include "FramelessHelper_p.h"
 
+#include <windows.h>
+
 // class FramelessHelper
 
 FramelessHelper::FramelessHelper(QWidget *parent)
@@ -95,11 +97,24 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
 
     if (ev->type() == QEvent::WinIdChange) {
         if (Q_NULLPTR == d->helper) {
-            d->window->removeEventFilter(this);
-            auto hwindow = d->window->windowHandle();
-            d->helper = new NativeWindowHelper(hwindow, d);
+            auto w = d->window->windowHandle();
+            d->helper = new NativeWindowHelper(w, d);
         }
     }
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 9, 0)
+    if (ev->type() == QEvent::Resize) {
+        if (d->window->windowState() & Qt::WindowMaximized) {
+            const QMargins &m = d->priMaximizedMargins;
+            int r = GetSystemMetrics(SM_CXFRAME) * 2 - m.left() - m.right();
+            int b = GetSystemMetrics(SM_CYFRAME) * 2 - m.top() - m.bottom();
+
+            d->window->setContentsMargins(0, 0, r, b);
+        } else {
+            d->window->setContentsMargins(0 ,0, 0, 0);
+        }
+    }
+#endif
 
     return QObject::eventFilter(obj, ev);
 }

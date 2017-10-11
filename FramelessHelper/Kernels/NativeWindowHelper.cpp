@@ -23,9 +23,9 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
     Q_D(NativeWindowHelper);
 
     Q_CHECK_PTR(window);
-    d->window = window;
-
     Q_CHECK_PTR(tester);
+
+    d->window = window;
     d->tester = tester;
 
     if (d->window) {
@@ -141,22 +141,7 @@ bool NativeWindowHelper::eventFilter(QObject *obj, QEvent *ev)
 {
     Q_D(NativeWindowHelper);
 
-    if (ev->type() == QEvent::Resize) {
-        if (d->isMaximized()) {
-            QMargins maximizedMargins
-                    = d->maximizedMargins();
-
-            QScreen *screen = d->window->screen();
-            QRect g = screen->availableGeometry();
-
-            int top = g.top() - maximizedMargins.top();
-            int left = g.left() - maximizedMargins.left();
-            int right = g.right() + maximizedMargins.right();
-            int bottom = g.bottom() + maximizedMargins.bottom();
-
-            d->window->setGeometry(left, top, right - left + 1, bottom - top + 1);
-        }
-    } else if (ev->type() == QEvent::WinIdChange) {
+    if (ev->type() == QEvent::WinIdChange) {
         d->updateWindowStyle();
     }
 
@@ -241,13 +226,13 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     int bottom = draggableMargins.bottom();
 
     if (top <= 0)
-        top = GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(0x5C); /* SM_CXPADDEDBORDER */
+        top = GetSystemMetrics(SM_CYFRAME);
     if (left <= 0)
-        left = GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(0x5C); /* SM_CXPADDEDBORDER */
+        left = GetSystemMetrics(SM_CXFRAME);
     if (right <= 0)
-        right = GetSystemMetrics(SM_CXFRAME) + GetSystemMetrics(0x5C); /* SM_CXPADDEDBORDER */
+        right = GetSystemMetrics(SM_CXFRAME);
     if (bottom <= 0)
-        bottom = GetSystemMetrics(SM_CYFRAME) + GetSystemMetrics(0x5C); /* SM_CXPADDEDBORDER */
+        bottom = GetSystemMetrics(SM_CYFRAME);
 
     auto result =
             (Top *    (y < (wfg.top() +    top))) |
