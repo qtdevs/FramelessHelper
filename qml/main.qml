@@ -29,4 +29,11 @@ Window {
             color: "blue"
         }
     }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
+            Qt.quit();
+        }
+    }
 }

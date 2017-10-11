@@ -27,9 +27,11 @@ void NativeWindowFilter::deliver(QWindow *window, NativeWindowHelper *helper)
             NativeWindowFilterPrivate::helpers.insert(newId, helper);
             NativeWindowFilterPrivate::helpers.remove(oldId);
             NativeWindowFilterPrivate::windows.insert(helper, newId);
+
+            NativeWindowFilterPrivate::winIds.insert(window, newId);
         }
     } else {
-        WId oldId = window->winId();
+        WId oldId = NativeWindowFilterPrivate::winIds.take(window);
         NativeWindowHelper *helper = NativeWindowFilterPrivate::helpers.take(oldId);
         NativeWindowFilterPrivate::windows.remove(helper);
     }
@@ -52,4 +54,5 @@ bool NativeWindowFilter::nativeEventFilter(const QByteArray &eventType,
 QScopedPointer<NativeWindowFilter> NativeWindowFilterPrivate::instance;
 
 QHash<NativeWindowHelper *, WId> NativeWindowFilterPrivate::windows;
+QHash<QWindow *, WId> NativeWindowFilterPrivate::winIds;
 QHash<WId, NativeWindowHelper *> NativeWindowFilterPrivate::helpers;

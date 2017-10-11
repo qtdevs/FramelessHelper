@@ -11,6 +11,7 @@ public:
     static QScopedPointer<NativeWindowFilter> instance;
 
     static QHash<NativeWindowHelper *, WId> windows;
+    static QHash<QWindow *, WId> winIds;
     static QHash<WId, NativeWindowHelper *> helpers;
 };
 
