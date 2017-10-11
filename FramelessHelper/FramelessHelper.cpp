@@ -103,7 +103,7 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 9, 0)
-    if (ev->type() == QEvent::Resize) {
+    if ((ev->type() == QEvent::Resize) || (ev->type() == QEvent::WindowStateChange)) {
         if (d->window->windowState() & Qt::WindowMaximized) {
             const QMargins &m = d->priMaximizedMargins;
             int r = GetSystemMetrics(SM_CXFRAME) * 2 - m.left() - m.right();
