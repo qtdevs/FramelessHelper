@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QTimer>
+#include <QWindow>
+#include <QScreen>
 #include <QPainter>
 
 #include "FramelessHelper.h"
@@ -8,7 +11,6 @@
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent, Qt::FramelessWindowHint)
     , ui(new Ui::MainWindow())
-    , window(Q_NULLPTR)
 {
     ui->setupUi(this);
 
@@ -20,6 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->maximizeButton, &QPushButton::clicked,
             this, &MainWindow::maximizeButtonClicked);
     ui->maximizeButton->setIcon(QIcon(QStringLiteral(":/res/maximize-button1.png")));
+
+    QTimer::singleShot(100, this, &MainWindow::syncPosition);
 }
 
 MainWindow::~MainWindow()
@@ -60,8 +64,10 @@ void MainWindow::maximizeButtonClicked()
     }
 }
 
-void MainWindow::on_openWindow_clicked()
+void MainWindow::syncPosition()
 {
-    if (window)
-        window->show();
+    QWindow *window = windowHandle();
+    QScreen *screen = window->screen();
+
+    window->setX(screen->availableGeometry().width() / 2 + 10);
 }

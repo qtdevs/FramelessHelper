@@ -1,14 +1,15 @@
-import QtQuick 2.2
+import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtShark.Window 1.0
 
 Window {
+    id: window
     visible: true
-    width: 640
-    height: 480
+    width: 400
+    height: 300
     title: qsTr("FramelessHelper")
 
-    flags: Qt.FramelessWindowHint
+    flags: Qt.FramelessWindowHint | Qt.WindowTitleHint
 
     FramelessHelper {
         id: framelessHelper
@@ -19,21 +20,70 @@ Window {
         }
     }
 
-    Rectangle {
-        id: titleBar
+    Image {
         anchors.fill: parent
+        source: "qrc:/res/background.png"
+    }
 
-        color: "yellow"
-        border {
-            width: 2
-            color: "blue"
+    Item {
+        id: titleBar
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+
+        height: 26
+    }
+
+    Row {
+        anchors {
+            top: titleBar.top
+            right: titleBar.right
+        }
+
+        MinimizeButton {
+            onClicked: {
+                window.showMinimized();
+            }
+        }
+        MaximizeButton {
+            isMaximized: Window.Maximized === window.visibility
+            onClicked: {
+                if (Window.Maximized === window.visibility) {
+                    window.showNormal();
+                } else {
+                    window.showMaximized();
+                }
+            }
+        }
+        CloseButton {
+            onClicked: {
+                window.close();
+            }
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            Qt.quit();
+    Text {
+        anchors {
+            top: titleBar.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
         }
+
+        text: "Qt Quick Inside"
+        font {
+            family: "Arial"
+            pointSize: 28
+        }
+        color: "#fefefe"
+
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+    }
+
+    Component.onCompleted: {
+        window.x = Screen.width / 2 - 410;
     }
 }

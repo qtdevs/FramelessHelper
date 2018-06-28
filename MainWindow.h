@@ -20,12 +20,11 @@ protected:
     bool event(QEvent *event) Q_DECL_FINAL;
 protected:
     void maximizeButtonClicked();
-private slots:
-    void on_openWindow_clicked();
 private:
     Ui::MainWindow *ui;
-public:
-    MainWindow *window;
+
+private:
+    void syncPosition();
 };
 
 #endif // MAINWINDOW_H

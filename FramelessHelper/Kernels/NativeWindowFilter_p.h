@@ -1,6 +1,7 @@
 #ifndef NATIVEWINDOWFILTER_P_H
 #define NATIVEWINDOWFILTER_P_H
 
+#include <QHash>
 #include <QWindow>
 
 #include "NativeWindowFilter.h"
