@@ -14,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle("Qt Widgets Inside");
+
     auto helper = new FramelessHelper(this);
     helper->setDraggableMargins(3, 3, 3, 3);
     helper->setMaximizedMargins(3, 3, 3, 3);

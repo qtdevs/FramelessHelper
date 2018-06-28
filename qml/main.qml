@@ -7,9 +7,9 @@ Window {
     visible: true
     width: 400
     height: 300
-    title: qsTr("FramelessHelper")
+    title: qsTr("Qt Quick Inside")
 
-    flags: Qt.FramelessWindowHint | Qt.WindowTitleHint
+    flags: Qt.Window | Qt.FramelessWindowHint
 
     FramelessHelper {
         id: framelessHelper
