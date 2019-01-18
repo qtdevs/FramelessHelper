@@ -23,14 +23,14 @@ class WindowFramelessHelper : public QObject, public QQmlParserStatus
     Q_INTERFACES(QQmlParserStatus)
 
 public:
-    explicit WindowFramelessHelper(QObject *parent = Q_NULLPTR);
+    explicit WindowFramelessHelper(QObject *parent = nullptr);
     virtual ~WindowFramelessHelper();
 
 public:
-    void classBegin() Q_DECL_FINAL;
-    void componentComplete() Q_DECL_FINAL;
+    void classBegin() final;
+    void componentComplete() final;
 
-Q_SIGNALS:
+signals:
     void topDraggableMarginChanged();
     void leftDraggableMarginChanged();
     void rightDraggableMarginChanged();
@@ -46,7 +46,7 @@ public:
     int rightDraggableMargin() const;
     int bottomDraggableMargin() const;
 
-Q_SIGNALS:
+signals:
     void topMaximizedMarginChanged();
     void leftMaximizedMarginChanged();
     void rightMaximizedMarginChanged();

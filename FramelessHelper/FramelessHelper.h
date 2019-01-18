@@ -10,7 +10,7 @@ class FramelessHelper : public QObject
     Q_DECLARE_PRIVATE(FramelessHelper)
 
 public:
-    explicit FramelessHelper(QWidget *parent = Q_NULLPTR);
+    explicit FramelessHelper(QWidget *parent = nullptr);
     virtual ~FramelessHelper();
 
 public:
@@ -31,7 +31,7 @@ public:
     int titleBarHeight() const;
 
 protected:
-    bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_FINAL;
+    bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:
     QScopedPointer<FramelessHelperPrivate> d_ptr;
 };

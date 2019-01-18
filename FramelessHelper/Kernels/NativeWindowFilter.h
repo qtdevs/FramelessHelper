@@ -12,7 +12,7 @@ public:
     static void deliver(QWindow *window, NativeWindowHelper *helper);
 protected:
     bool nativeEventFilter(const QByteArray &eventType,
-                           void *message, long *result) Q_DECL_FINAL;
+                           void *message, long *result) final;
 };
 
 #endif // NATIVEWINDOWFILTER_H

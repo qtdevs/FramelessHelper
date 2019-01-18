@@ -9,8 +9,9 @@
 #include <QEvent>
 #include <QtWin>
 
+#include <QOperatingSystemVersion>
+
 #include "NativeWindowFilter.h"
-#include "NativeWindowTester.h"
 
 // class NativeWindowHelper
 
@@ -75,7 +76,7 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
         return true;
     } else if (WM_NCACTIVATE == lpMsg->message) {
         if (!QtWin::isCompositionEnabled()) {
-            *result = 1;
+            if (result) *result = 1;
             return true;
         }
     } else if (WM_NCCALCSIZE == lpMsg->message) {
@@ -95,7 +96,7 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                 params.rgrc[0].bottom = g.bottom() + maximizedMargins.bottom() + 1;
             }
 
-            *result = 0;
+            if (result) *result = 0;
             return true;
         }
     } else if (WM_GETMINMAXINFO == lpMsg->message) {
@@ -112,8 +113,8 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
 
         LPMINMAXINFO lpMMInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
 
-        lpMMInfo->ptMaxPosition.x = left;
-        lpMMInfo->ptMaxPosition.y =  top;
+        lpMMInfo->ptMaxPosition.x = - maximizedMargins.left();
+        lpMMInfo->ptMaxPosition.y =  - maximizedMargins.top();
         lpMMInfo->ptMaxSize.x = right - left + 1;
         lpMMInfo->ptMaxSize.y = bottom - top + 1;
 
@@ -122,14 +123,14 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
         lpMMInfo->ptMaxTrackSize.x = d->window->maximumWidth();
         lpMMInfo->ptMaxTrackSize.y = d->window->maximumHeight();
 
-        *result = 0;
+        if (result) *result = 0;
         return true;
     } else if (WM_NCLBUTTONDBLCLK == lpMsg->message) {
         auto minimumSize = d->window->minimumSize();
         auto maximumSize = d->window->maximumSize();
         if ((minimumSize.width() >= maximumSize.width())
                 || (minimumSize.height() >= maximumSize.height())) {
-            *result = 0;
+            if (result) *result = 0;
             return true;
         }
     }
@@ -143,6 +144,8 @@ bool NativeWindowHelper::eventFilter(QObject *obj, QEvent *ev)
 
     if (ev->type() == QEvent::WinIdChange) {
         d->updateWindowStyle();
+    } else if (ev->type() == QEvent::Show) {
+        d->updateWindowStyle();
     }
 
     return QObject::eventFilter(obj, ev);
@@ -151,16 +154,17 @@ bool NativeWindowHelper::eventFilter(QObject *obj, QEvent *ev)
 // class NativeWindowHelperPrivate
 
 NativeWindowHelperPrivate::NativeWindowHelperPrivate()
-    : q_ptr(Q_NULLPTR)
-    , window(Q_NULLPTR)
-    , tester(Q_NULLPTR)
+    : q_ptr(nullptr)
+    , window(nullptr)
+    , tester(nullptr)
+    , oldWindow(NULL)
 {
 }
 
 NativeWindowHelperPrivate::~NativeWindowHelperPrivate()
 {
     if (window)
-        NativeWindowFilter::deliver(window, Q_NULLPTR);
+        NativeWindowFilter::deliver(window, nullptr);
 }
 
 void NativeWindowHelperPrivate::updateWindowStyle()
@@ -172,8 +176,17 @@ void NativeWindowHelperPrivate::updateWindowStyle()
     HWND hWnd = reinterpret_cast<HWND>(window->winId());
     if (NULL == hWnd)
         return;
+    else if (oldWindow == hWnd) {
+        return;
+    }
+    oldWindow = hWnd;
 
     NativeWindowFilter::deliver(window, q);
+
+    QOperatingSystemVersion currentVersion = QOperatingSystemVersion::current();
+    if (currentVersion < QOperatingSystemVersion::Windows8) {
+        return;
+    }
 
     LONG oldStyle = WS_OVERLAPPEDWINDOW | WS_THICKFRAME
             | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;;
@@ -244,18 +257,18 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     bool hResizable = window->minimumHeight() < window->maximumHeight();
 
     switch (result) {
-    case Top | Left    : return wResizable && hResizable ? HTTOPLEFT     : result;
-    case Top           : return hResizable               ? HTTOP         : result;
-    case Top | Right   : return wResizable && hResizable ? HTTOPRIGHT    : result;
-    case Right         : return wResizable               ? HTRIGHT       : result;
-    case Bottom | Right: return wResizable && hResizable ? HTBOTTOMRIGHT : result;
-    case Bottom        : return hResizable               ? HTBOTTOM      : result;
-    case Bottom | Left : return wResizable && hResizable ? HTBOTTOMLEFT  : result;
-    case Left          : return wResizable               ? HTLEFT        : result;
+    case Top | Left    : return wResizable && hResizable ? HTTOPLEFT     : HTCLIENT;
+    case Top           : return hResizable               ? HTTOP         : HTCLIENT;
+    case Top | Right   : return wResizable && hResizable ? HTTOPRIGHT    : HTCLIENT;
+    case Right         : return wResizable               ? HTRIGHT       : HTCLIENT;
+    case Bottom | Right: return wResizable && hResizable ? HTBOTTOMRIGHT : HTCLIENT;
+    case Bottom        : return hResizable               ? HTBOTTOM      : HTCLIENT;
+    case Bottom | Left : return wResizable && hResizable ? HTBOTTOMLEFT  : HTCLIENT;
+    case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
     auto pos = window->mapFromGlobal(QPoint(x, y));
-    return ((Q_NULLPTR != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
+    return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
 }
 
 bool NativeWindowHelperPrivate::isMaximized() const

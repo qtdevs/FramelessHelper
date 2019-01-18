@@ -6,7 +6,6 @@
 #include "FramelessHelper.h"
 
 #include "Kernels/NativeWindowHelper.h"
-#include "Kernels/NativeWindowTester.h"
 
 class FramelessHelperPrivate : public NativeWindowTester
 {
@@ -15,10 +14,10 @@ public:
     virtual ~FramelessHelperPrivate();
 
 public:
-    QMargins draggableMargins() const Q_DECL_FINAL;
-    QMargins maximizedMargins() const Q_DECL_FINAL;
+    QMargins draggableMargins() const final;
+    QMargins maximizedMargins() const final;
 
-    bool hitTest(const QPoint &pos) const Q_DECL_FINAL;
+    bool hitTest(const QPoint &pos) const final;
 
 public:
     QWidget            *window;

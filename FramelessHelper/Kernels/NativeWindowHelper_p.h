@@ -24,6 +24,8 @@ public:
 public:
     QWindow            *window;
     NativeWindowTester *tester;
+public:
+    HWND oldWindow;
 };
 
 #endif // NATIVEWINDOWHELPER_P_H

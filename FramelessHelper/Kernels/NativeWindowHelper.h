@@ -1,9 +1,19 @@
 #ifndef NATIVEWINDOWHELPER_H
 #define NATIVEWINDOWHELPER_H
 
+#include <QPoint>
 #include <QWindow>
+#include <QMargins>
 
-class NativeWindowTester;
+class NativeWindowTester
+{
+public:
+    virtual QMargins draggableMargins() const = 0;
+    virtual QMargins maximizedMargins() const = 0;
+
+    virtual bool hitTest(const QPoint &pos) const = 0;
+};
+
 class NativeWindowHelperPrivate;
 class NativeWindowHelper : public QObject
 {
@@ -18,7 +28,7 @@ public:
 public:
     bool nativeEventFilter(void *msg, long *result);
 protected:
-    bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_FINAL;
+    bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:
     QScopedPointer<NativeWindowHelperPrivate> d_ptr;
 };

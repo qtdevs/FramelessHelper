@@ -7,7 +7,6 @@
 #include "WindowFramelessHelper.h"
 
 #include "Kernels/NativeWindowHelper.h"
-#include "Kernels/NativeWindowTester.h"
 
 class WindowFramelessHelperPrivate : public NativeWindowTester
 {
@@ -16,10 +15,10 @@ public:
     virtual ~WindowFramelessHelperPrivate();
 
 public:
-    QMargins draggableMargins() const Q_DECL_FINAL;
-    QMargins maximizedMargins() const Q_DECL_FINAL;
+    QMargins draggableMargins() const final;
+    QMargins maximizedMargins() const final;
 
-    bool hitTest(const QPoint &pos) const Q_DECL_FINAL;
+    bool hitTest(const QPoint &pos) const final;
 
 public:
     QQuickWindow       *window;

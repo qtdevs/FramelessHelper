@@ -16,8 +16,8 @@ public:
     virtual ~MainWindow();
 
 protected:
-    void paintEvent(QPaintEvent *event) Q_DECL_FINAL;
-    bool event(QEvent *event) Q_DECL_FINAL;
+    void paintEvent(QPaintEvent *event) final;
+    bool event(QEvent *event) final;
 protected:
     void maximizeButtonClicked();
 private:

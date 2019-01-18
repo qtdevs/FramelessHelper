@@ -24,7 +24,7 @@ void WindowFramelessHelper::componentComplete()
     Q_D(WindowFramelessHelper);
 
     auto obj = parent();
-    while (Q_NULLPTR != obj) {
+    while (nullptr != obj) {
         if (obj->inherits("QQuickRootItem")) {
             if (auto rootItem = qobject_cast<QQuickItem *>(obj)) {
                 if (auto window = rootItem->window()) {
@@ -207,8 +207,8 @@ int WindowFramelessHelper::titleBarHeight() const
 // class WindowFramelessHelperPrivate
 
 WindowFramelessHelperPrivate::WindowFramelessHelperPrivate()
-    : window(Q_NULLPTR)
-    , helper(Q_NULLPTR)
+    : window(nullptr)
+    , helper(nullptr)
     , titleBarHeight(0)
 {
 }
@@ -237,11 +237,11 @@ bool WindowFramelessHelperPrivate::hitTest(const QPoint &pos) const
         return false;
 
     QQuickItem *child = window->contentItem();
-    if (Q_NULLPTR == child)
+    if (nullptr == child)
         return false;
 
     child = child->childAt(pos.x(), pos.y());
-    while (Q_NULLPTR != child) {
+    while (nullptr != child) {
         if (extraTitleBars.contains(child))
             break;
 

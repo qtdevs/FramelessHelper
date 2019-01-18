@@ -96,7 +96,7 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
     Q_D(FramelessHelper);
 
     if (ev->type() == QEvent::WinIdChange) {
-        if (Q_NULLPTR == d->helper) {
+        if (nullptr == d->helper) {
             auto w = d->window->windowHandle();
             d->helper = new NativeWindowHelper(w, d);
         }
@@ -122,8 +122,8 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
 // class FramelessHelperPrivate
 
 FramelessHelperPrivate::FramelessHelperPrivate()
-    : window(Q_NULLPTR)
-    , helper(Q_NULLPTR)
+    : window(nullptr)
+    , helper(nullptr)
     , titleBarHeight(0)
 {
 }
@@ -152,10 +152,10 @@ bool FramelessHelperPrivate::hitTest(const QPoint &pos) const
         return false;
 
     QWidget *child = window->childAt(pos);
-    if (Q_NULLPTR == child)
+    if (nullptr == child)
         return true;
 
-    while (Q_NULLPTR != child) {
+    while (nullptr != child) {
         if (extraTitleBars.contains(child))
             break;
 
