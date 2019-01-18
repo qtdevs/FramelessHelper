@@ -24,8 +24,11 @@ public:
     QMargins maximizedMargins() const;
 
 public:
-    void addTitleBar(QWidget *w);
-    void removeTitleBar(QWidget *w);
+    void addIncludeItem(QWidget *item);
+    void removeIncludeItem(QWidget *item);
+public:
+    void addExcludeItem(QWidget *item);
+    void removeExcludeItem(QWidget *item);
 public:
     void setTitleBarHeight(int h);
     int titleBarHeight() const;

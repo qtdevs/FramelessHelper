@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     helper->setMaximizedMargins(3, 3, 3, 3);
     helper->setTitleBarHeight(32);
 
+    helper->addExcludeItem(ui->minimizeButton);
+    helper->addExcludeItem(ui->maximizeButton);
+    helper->addExcludeItem(ui->closeButton);
+
     connect(ui->maximizeButton, &QPushButton::clicked,
             this, &MainWindow::maximizeButtonClicked);
     ui->maximizeButton->setIcon(QIcon(QStringLiteral(":/res/maximize-button1.png")));

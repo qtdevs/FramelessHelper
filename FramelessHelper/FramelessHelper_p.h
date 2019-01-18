@@ -28,6 +28,9 @@ public:
 public:
     QSet<QWidget *> extraTitleBars;
     int             titleBarHeight;
+public:
+    QSet<QWidget *> includeItems;
+    QSet<QWidget *> excludeItems;
 };
 
 #endif // STYLEDHELPER_P_H

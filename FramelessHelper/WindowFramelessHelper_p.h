@@ -29,6 +29,9 @@ public:
 public:
     QSet<QQuickItem *> extraTitleBars;
     int                titleBarHeight;
+public:
+    QSet<QQuickItem *> includeItems;
+    QSet<QQuickItem *> excludeItems;
 };
 
 #endif // QSHARKFRAMELESSHELPER_P_H

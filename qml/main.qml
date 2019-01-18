@@ -15,8 +15,9 @@ Window {
         id: framelessHelper
 
         Component.onCompleted: {
-            addTitleBar(titleBar)
+            addIncludeItem(titleBar)
             setTitleBarHeight(60)
+            addExcludeItem(controls)
         }
     }
 
@@ -37,6 +38,7 @@ Window {
     }
 
     Row {
+        id: controls
         anchors {
             top: titleBar.top
             right: titleBar.right

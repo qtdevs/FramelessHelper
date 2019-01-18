@@ -63,10 +63,14 @@ public:
     int bottomMaximizedMargin() const;
 
 public:
-    Q_INVOKABLE void addTitleBar(QQuickItem *w);
-    Q_INVOKABLE void removeTitleBar(QQuickItem *w);
+    Q_INVOKABLE void addIncludeItem(QQuickItem *item);
+    Q_INVOKABLE void removeIncludeItem(QQuickItem *item);
 public:
-    Q_INVOKABLE void setTitleBarHeight(int h);
+    Q_INVOKABLE void addExcludeItem(QQuickItem *item);
+    Q_INVOKABLE void removeExcludeItem(QQuickItem *item);
+
+public:
+    Q_INVOKABLE void setTitleBarHeight(int v);
     Q_INVOKABLE int titleBarHeight() const;
 
 protected:

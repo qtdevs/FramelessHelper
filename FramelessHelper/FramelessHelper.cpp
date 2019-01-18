@@ -63,25 +63,39 @@ QMargins FramelessHelper::maximizedMargins() const
     return d->priMaximizedMargins;
 }
 
-void FramelessHelper::addTitleBar(QWidget *w)
+void FramelessHelper::addIncludeItem(QWidget *item)
 {
     Q_D(FramelessHelper);
 
-    d->extraTitleBars.insert(w);
+    d->includeItems.insert(item);
 }
 
-void FramelessHelper::removeTitleBar(QWidget *w)
+void FramelessHelper::removeIncludeItem(QWidget *item)
 {
     Q_D(FramelessHelper);
 
-    d->extraTitleBars.remove(w);
+    d->includeItems.remove(item);
 }
 
-void FramelessHelper::setTitleBarHeight(int h)
+void FramelessHelper::addExcludeItem(QWidget *item)
 {
     Q_D(FramelessHelper);
 
-    d->titleBarHeight = h;
+    d->excludeItems.insert(item);
+}
+
+void FramelessHelper::removeExcludeItem(QWidget *item)
+{
+    Q_D(FramelessHelper);
+
+    d->excludeItems.remove(item);
+}
+
+void FramelessHelper::setTitleBarHeight(int v)
+{
+    Q_D(FramelessHelper);
+
+    d->titleBarHeight = v;
 }
 
 int FramelessHelper::titleBarHeight() const
@@ -148,21 +162,37 @@ bool FramelessHelperPrivate::hitTest(const QPoint &pos) const
         return false;
     else if (titleBarHeight == 0)
         return false;
-    else if ((titleBarHeight > 0) && (pos.y() >= titleBarHeight))
+    else if ((titleBarHeight > 0)
+             && (pos.y() >= titleBarHeight))
         return false;
 
-    QWidget *child = window->childAt(pos);
-    if (nullptr == child)
-        return true;
+    int currentIndex = -1;
+    QWidget *items[32] = {0};
+    auto child = window;
+    QPoint p = pos;
 
-    while (nullptr != child) {
-        if (extraTitleBars.contains(child))
+    while (child && (currentIndex < 31)) {
+        items[++currentIndex] = child;
+        auto grandchild = child->childAt(p);
+        if (nullptr == grandchild) {
             break;
+        }
 
-        auto className = child->metaObject()->className();
-        child = child->parentWidget();
-        if (child && (qstrcmp(className, "QWidget") != 0))
+        p = grandchild->mapFrom(child, p);
+        child = grandchild;
+    }
+
+    while (currentIndex > 0) {
+        child = items[currentIndex];
+        --currentIndex;
+
+        if (includeItems.contains(child)) {
+            break;
+        } else if (excludeItems.contains(child)) {
             return false;
+        } else if (window == child) {
+            break;
+        }
     }
 
     return true;

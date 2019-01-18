@@ -176,25 +176,39 @@ int WindowFramelessHelper::bottomMaximizedMargin() const
     return d->priMaximizedMargins.bottom();
 }
 
-void WindowFramelessHelper::addTitleBar(QQuickItem *w)
+void WindowFramelessHelper::addIncludeItem(QQuickItem *item)
 {
     Q_D(WindowFramelessHelper);
 
-    d->extraTitleBars.insert(w);
+    d->includeItems.insert(item);
 }
 
-void WindowFramelessHelper::removeTitleBar(QQuickItem *w)
+void WindowFramelessHelper::removeIncludeItem(QQuickItem *item)
 {
     Q_D(WindowFramelessHelper);
 
-    d->extraTitleBars.remove(w);
+    d->includeItems.remove(item);
 }
 
-void WindowFramelessHelper::setTitleBarHeight(int h)
+void WindowFramelessHelper::addExcludeItem(QQuickItem *item)
 {
     Q_D(WindowFramelessHelper);
 
-    d->titleBarHeight = h;
+    d->excludeItems.insert(item);
+}
+
+void WindowFramelessHelper::removeExcludeItem(QQuickItem *item)
+{
+    Q_D(WindowFramelessHelper);
+
+    d->excludeItems.remove(item);
+}
+
+void WindowFramelessHelper::setTitleBarHeight(int v)
+{
+    Q_D(WindowFramelessHelper);
+
+    d->titleBarHeight = v;
 }
 
 int WindowFramelessHelper::titleBarHeight() const
@@ -233,22 +247,42 @@ bool WindowFramelessHelperPrivate::hitTest(const QPoint &pos) const
         return false;
     else if (titleBarHeight == 0)
         return false;
-    else if ((titleBarHeight > 0) && (pos.y() >= titleBarHeight))
+    else if ((titleBarHeight > 0)
+             && (pos.y() >= titleBarHeight))
         return false;
 
-    QQuickItem *child = window->contentItem();
-    if (nullptr == child)
+    auto rootItem = window->contentItem();
+    if (nullptr == rootItem) {
         return false;
+    }
 
-    child = child->childAt(pos.x(), pos.y());
-    while (nullptr != child) {
-        if (extraTitleBars.contains(child))
+    int currentIndex = -1;
+    QQuickItem *items[32] = {0};
+    auto child = rootItem;
+    QPointF p = pos;
+
+    while (child && (currentIndex < 31)) {
+        items[++currentIndex] = child;
+        auto grandchild = child->childAt(p.x(), p.y());
+        if (nullptr == grandchild) {
             break;
+        }
 
-        const char *className = child->metaObject()->className();
-        child = child->parentItem();
-        if (child && (qstrcmp(className, "QQuickRootItem") != 0))
+        p = child->mapToItem(grandchild, p);
+        child = grandchild;
+    }
+
+    while (currentIndex > 0) {
+        child = items[currentIndex];
+        --currentIndex;
+
+        if (includeItems.contains(child)) {
+            break;
+        } else if (excludeItems.contains(child)) {
             return false;
+        } else if (rootItem == child) {
+            break;
+        }
     }
 
     return true;
