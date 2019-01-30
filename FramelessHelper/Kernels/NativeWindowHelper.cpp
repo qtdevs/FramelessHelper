@@ -221,6 +221,9 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
+    x = x / window->devicePixelRatio();
+    y = y / window->devicePixelRatio();
+
     enum RegionMask {
         Client = 0x0000,
         Top    = 0x0001,
