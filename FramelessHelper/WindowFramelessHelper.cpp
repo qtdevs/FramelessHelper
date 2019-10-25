@@ -287,12 +287,14 @@ QMargins WindowFramelessHelperPrivate::maximizedMargins() const
 
 bool WindowFramelessHelperPrivate::hitTest(const QPoint &pos) const
 {
+    int scaledTitleBarHeight = titleBarHeight * helper->scaleFactor();
+
     if (!window)
         return false;
-    else if (titleBarHeight == 0)
+    else if (scaledTitleBarHeight == 0)
         return false;
-    else if ((titleBarHeight > 0)
-             && (pos.y() >= titleBarHeight))
+    else if ((scaledTitleBarHeight > 0)
+             && (pos.y() >= scaledTitleBarHeight))
         return false;
 
     auto rootItem = window->contentItem();
