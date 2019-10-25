@@ -25,8 +25,13 @@ MainWindow::MainWindow(QWidget *parent)
     helper->addExcludeItem(ui->maximizeButton);
     helper->addExcludeItem(ui->closeButton);
 
+    connect(ui->minimizeButton, &QPushButton::clicked,
+            helper, &FramelessHelper::triggerMinimizeButtonAction);
     connect(ui->maximizeButton, &QPushButton::clicked,
-            this, &MainWindow::maximizeButtonClicked);
+            helper, &FramelessHelper::triggerMaximizeButtonAction);
+    connect(ui->closeButton, &QPushButton::clicked,
+            helper, &FramelessHelper::triggerCloseButtonAction);
+
     ui->maximizeButton->setIcon(QIcon(QStringLiteral(":/res/maximize-button1.png")));
 
     QTimer::singleShot(100, this, &MainWindow::syncPosition);
@@ -66,15 +71,6 @@ bool MainWindow::event(QEvent *event)
     }
 
     return QWidget::event(event);
-}
-
-void MainWindow::maximizeButtonClicked()
-{
-    if (windowState() & Qt::WindowMaximized) {
-        showNormal();
-    } else {
-        showMaximized();
-    }
 }
 
 void MainWindow::syncPosition()

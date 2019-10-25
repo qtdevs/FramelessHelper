@@ -112,6 +112,37 @@ qreal FramelessHelper::scaleFactor() const
     return d->helper ? d->helper->scaleFactor() : 1.0;
 }
 
+void FramelessHelper::triggerMinimizeButtonAction()
+{
+    Q_D(FramelessHelper);
+
+    if (d->window) {
+        d->window->showMinimized();
+    }
+}
+
+void FramelessHelper::triggerMaximizeButtonAction()
+{
+    Q_D(FramelessHelper);
+
+    if (d->window) {
+        if (d->window->windowState() & Qt::WindowMaximized) {
+            d->window->showNormal();
+        } else {
+            d->window->showMaximized();
+        }
+    }
+}
+
+void FramelessHelper::triggerCloseButtonAction()
+{
+    Q_D(FramelessHelper);
+
+    if (d->window) {
+        d->window->close();
+    }
+}
+
 bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
 {
     Q_D(FramelessHelper);

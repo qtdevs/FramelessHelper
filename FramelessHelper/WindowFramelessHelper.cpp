@@ -231,6 +231,37 @@ qreal WindowFramelessHelper::scaleFactor() const
     return d->helper ? d->helper->scaleFactor() : 1.0;
 }
 
+void WindowFramelessHelper::triggerMinimizeButtonAction()
+{
+    Q_D(WindowFramelessHelper);
+
+    if (d->window) {
+        d->window->setWindowStates((d->window->windowStates() & ~Qt::WindowActive) | Qt::WindowMinimized);
+    }
+}
+
+void WindowFramelessHelper::triggerMaximizeButtonAction()
+{
+    Q_D(WindowFramelessHelper);
+
+    if (d->window) {
+        if (QWindow::Maximized == d->window->visibility()) {
+            d->window->showNormal();
+        } else {
+            d->window->showMaximized();
+        }
+    }
+}
+
+void WindowFramelessHelper::triggerCloseButtonAction()
+{
+    Q_D(WindowFramelessHelper);
+
+    if (d->window) {
+        d->window->close();
+    }
+}
+
 // class WindowFramelessHelperPrivate
 
 WindowFramelessHelperPrivate::WindowFramelessHelperPrivate()

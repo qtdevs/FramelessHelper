@@ -64,12 +64,12 @@ public:
     int rightMaximizedMargin() const;
     int bottomMaximizedMargin() const;
 
-public:
-    Q_INVOKABLE void addIncludeItem(QQuickItem *item);
-    Q_INVOKABLE void removeIncludeItem(QQuickItem *item);
-public:
-    Q_INVOKABLE void addExcludeItem(QQuickItem *item);
-    Q_INVOKABLE void removeExcludeItem(QQuickItem *item);
+public slots:
+    void addIncludeItem(QQuickItem *item);
+    void removeIncludeItem(QQuickItem *item);
+public slots:
+    void addExcludeItem(QQuickItem *item);
+    void removeExcludeItem(QQuickItem *item);
 
 public:
     Q_INVOKABLE void setTitleBarHeight(int v);
@@ -79,6 +79,11 @@ signals:
     void scaleFactorChanged();
 public:
     qreal scaleFactor() const;
+
+public slots:
+    void triggerMinimizeButtonAction();
+    void triggerMaximizeButtonAction();
+    void triggerCloseButtonAction();
 
 protected:
     QScopedPointer<WindowFramelessHelperPrivate> d_ptr;

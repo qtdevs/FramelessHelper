@@ -38,6 +38,11 @@ signals:
 public:
     qreal scaleFactor() const;
 
+public slots:
+    void triggerMinimizeButtonAction();
+    void triggerMaximizeButtonAction();
+    void triggerCloseButtonAction();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:

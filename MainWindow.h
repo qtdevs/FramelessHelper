@@ -18,8 +18,6 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) final;
     bool event(QEvent *event) final;
-protected:
-    void maximizeButtonClicked();
 private:
     Ui::MainWindow *ui;
 

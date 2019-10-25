@@ -75,22 +75,18 @@ Window {
 
         MinimizeButton {
             onClicked: {
-                window.showMinimized();
+                framelessHelper.triggerMinimizeButtonAction();
             }
         }
         MaximizeButton {
             isMaximized: Window.Maximized === window.visibility
             onClicked: {
-                if (Window.Maximized === window.visibility) {
-                    window.showNormal();
-                } else {
-                    window.showMaximized();
-                }
+                framelessHelper.triggerMaximizeButtonAction();
             }
         }
         CloseButton {
             onClicked: {
-                window.close();
+                framelessHelper.triggerCloseButtonAction();
             }
         }
     }
