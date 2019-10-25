@@ -31,6 +31,11 @@ protected:
     bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:
     QScopedPointer<NativeWindowHelperPrivate> d_ptr;
+
+signals:
+    void scaleFactorChanged(qreal factor);
+public:
+    qreal scaleFactor() const;
 };
 
 #endif // NATIVEWINDOWHELPER_H

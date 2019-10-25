@@ -29,7 +29,13 @@ void WindowFramelessHelper::componentComplete()
             if (auto rootItem = qobject_cast<QQuickItem *>(obj)) {
                 if (auto window = rootItem->window()) {
                     d->window = window;
+
                     d->helper = new NativeWindowHelper(window, d);
+                    connect(d->helper, &NativeWindowHelper::scaleFactorChanged,
+                            this, &WindowFramelessHelper::scaleFactorChanged);
+                    if (!qFuzzyCompare(d->helper->scaleFactor(), 1.0)) {
+                        emit scaleFactorChanged();
+                    }
                 }
 
                 break;
@@ -216,6 +222,13 @@ int WindowFramelessHelper::titleBarHeight() const
     Q_D(const WindowFramelessHelper);
 
     return d->titleBarHeight;
+}
+
+qreal WindowFramelessHelper::scaleFactor() const
+{
+    Q_D(const WindowFramelessHelper);
+
+    return d->helper ? d->helper->scaleFactor() : 1.0;
 }
 
 // class WindowFramelessHelperPrivate

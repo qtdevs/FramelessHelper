@@ -105,6 +105,13 @@ int FramelessHelper::titleBarHeight() const
     return d->titleBarHeight;
 }
 
+qreal FramelessHelper::scaleFactor() const
+{
+    Q_D(const FramelessHelper);
+
+    return d->helper ? d->helper->scaleFactor() : 1.0;
+}
+
 bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
 {
     Q_D(FramelessHelper);
@@ -112,7 +119,13 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
     if (ev->type() == QEvent::WinIdChange) {
         if (nullptr == d->helper) {
             auto w = d->window->windowHandle();
+
             d->helper = new NativeWindowHelper(w, d);
+            connect(d->helper, &NativeWindowHelper::scaleFactorChanged,
+                    this, &FramelessHelper::scaleFactorChanged);
+            if (!qFuzzyCompare(d->helper->scaleFactor(), 1.0)) {
+                emit scaleFactorChanged(d->helper->scaleFactor());
+            }
         }
     }
 

@@ -33,6 +33,11 @@ public:
     void setTitleBarHeight(int h);
     int titleBarHeight() const;
 
+signals:
+    void scaleFactorChanged(qreal factor);
+public:
+    qreal scaleFactor() const;
+
 protected:
     bool eventFilter(QObject *obj, QEvent *ev) final;
 protected:

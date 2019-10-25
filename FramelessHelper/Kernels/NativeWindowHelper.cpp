@@ -30,12 +30,12 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
     d->tester = tester;
 
     if (d->window) {
+        d->scaleFactor = d->window->screen()->devicePixelRatio();
+
         if (d->window->flags() & Qt::FramelessWindowHint) {
             d->window->installEventFilter(this);
             d->updateWindowStyle();
         }
-
-        d->scaleFactor = d->window->screen()->devicePixelRatio();
     }
 }
 
@@ -51,12 +51,12 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window)
     d->window = window;
 
     if (d->window) {
+        d->scaleFactor = d->window->screen()->devicePixelRatio();
+
         if (d->window->flags() & Qt::FramelessWindowHint) {
             d->window->installEventFilter(this);
             d->updateWindowStyle();
         }
-
-        d->scaleFactor = d->window->screen()->devicePixelRatio();
     }
 }
 
@@ -127,10 +127,15 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
             return true;
         }
     } else if (WM_DPICHANGED == lpMsg->message) {
+        qreal old = d->scaleFactor;
         if (HIWORD(wParam) < 144) {
             d->scaleFactor = 1.0;
         } else {
             d->scaleFactor = 2.0;
+        }
+
+        if (!qFuzzyCompare(old, d->scaleFactor)) {
+            emit scaleFactorChanged(d->scaleFactor);
         }
 
         auto hWnd = reinterpret_cast<HWND>(d->window->winId());
@@ -158,6 +163,13 @@ bool NativeWindowHelper::eventFilter(QObject *obj, QEvent *ev)
     }
 
     return QObject::eventFilter(obj, ev);
+}
+
+qreal NativeWindowHelper::scaleFactor() const
+{
+    Q_D(const NativeWindowHelper);
+
+    return d->scaleFactor;
 }
 
 // class NativeWindowHelperPrivate
