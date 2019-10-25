@@ -11,12 +11,12 @@ Button {
     ToolTip.delay: Qt.styleHints.mousePressAndHoldInterval
     ToolTip.text: qsTr("Maximize")
 
-    property bool isMaximized: false
+    property bool maximized: false
 
     contentItem: Item {
         Image {
             anchors.centerIn: parent
-            source: isMaximized ? "qrc:/res/maximize-button2.png" : "qrc:/res/maximize-button1.png"
+            source: maximized ? "qrc:/res/maximize-button2.png" : "qrc:/res/maximize-button1.png"
         }
     }
 

@@ -210,11 +210,14 @@ void WindowFramelessHelper::removeExcludeItem(QQuickItem *item)
     d->excludeItems.remove(item);
 }
 
-void WindowFramelessHelper::setTitleBarHeight(int v)
+void WindowFramelessHelper::setTitleBarHeight(int value)
 {
     Q_D(WindowFramelessHelper);
 
-    d->titleBarHeight = v;
+    if (value != d->titleBarHeight) {
+        d->titleBarHeight = value;
+        emit titleBarHeightChanged();
+    }
 }
 
 int WindowFramelessHelper::titleBarHeight() const
@@ -236,7 +239,8 @@ void WindowFramelessHelper::triggerMinimizeButtonAction()
     Q_D(WindowFramelessHelper);
 
     if (d->window) {
-        d->window->setWindowStates((d->window->windowStates() & ~Qt::WindowActive) | Qt::WindowMinimized);
+        auto oldStates = d->window->windowStates();
+        d->window->setWindowStates((oldStates & ~Qt::WindowActive) | Qt::WindowMinimized);
     }
 }
 

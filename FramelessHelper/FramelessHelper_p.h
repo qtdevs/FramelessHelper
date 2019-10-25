@@ -31,6 +31,9 @@ public:
 public:
     QSet<QWidget *> includeItems;
     QSet<QWidget *> excludeItems;
+
+public:
+    bool maximized;
 };
 
 #endif // STYLEDHELPER_P_H

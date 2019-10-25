@@ -29,14 +29,23 @@ public:
 public:
     void addExcludeItem(QWidget *item);
     void removeExcludeItem(QWidget *item);
+
+signals:
+    void titleBarHeightChanged(int newValue);
+public slots:
+    void setTitleBarHeight(int value);
 public:
-    void setTitleBarHeight(int h);
     int titleBarHeight() const;
 
 signals:
     void scaleFactorChanged(qreal factor);
 public:
     qreal scaleFactor() const;
+
+signals:
+    void maximizedChanged(bool maximized);
+public:
+    bool isMaximized() const;
 
 public slots:
     void triggerMinimizeButtonAction();

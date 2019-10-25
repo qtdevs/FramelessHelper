@@ -20,6 +20,8 @@ class WindowFramelessHelper : public QObject, public QQmlParserStatus
     Q_PROPERTY(int rightMaximizedMargin READ rightMaximizedMargin WRITE setRightMaximizedMargin NOTIFY rightMaximizedMarginChanged)
     Q_PROPERTY(int bottomMaximizedMargin READ bottomMaximizedMargin WRITE setBottomMaximizedMargin NOTIFY bottomMaximizedMarginChanged)
 
+    Q_PROPERTY(int titleBarHeight READ titleBarHeight WRITE setTitleBarHeight NOTIFY titleBarHeightChanged)
+
     Q_PROPERTY(qreal scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
 
     Q_INTERFACES(QQmlParserStatus)
@@ -71,9 +73,12 @@ public slots:
     void addExcludeItem(QQuickItem *item);
     void removeExcludeItem(QQuickItem *item);
 
+signals:
+    void titleBarHeightChanged();
+public slots:
+    void setTitleBarHeight(int value);
 public:
-    Q_INVOKABLE void setTitleBarHeight(int v);
-    Q_INVOKABLE int titleBarHeight() const;
+    int titleBarHeight() const;
 
 signals:
     void scaleFactorChanged();

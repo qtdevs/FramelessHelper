@@ -91,11 +91,14 @@ void FramelessHelper::removeExcludeItem(QWidget *item)
     d->excludeItems.remove(item);
 }
 
-void FramelessHelper::setTitleBarHeight(int v)
+void FramelessHelper::setTitleBarHeight(int value)
 {
     Q_D(FramelessHelper);
 
-    d->titleBarHeight = v;
+    if (value != d->titleBarHeight) {
+        d->titleBarHeight = value;
+        emit titleBarHeightChanged(value);
+    }
 }
 
 int FramelessHelper::titleBarHeight() const
@@ -110,6 +113,13 @@ qreal FramelessHelper::scaleFactor() const
     Q_D(const FramelessHelper);
 
     return d->helper ? d->helper->scaleFactor() : 1.0;
+}
+
+bool FramelessHelper::isMaximized() const
+{
+    Q_D(const FramelessHelper);
+
+    return d->maximized;
 }
 
 void FramelessHelper::triggerMinimizeButtonAction()
@@ -147,7 +157,13 @@ bool FramelessHelper::eventFilter(QObject *obj, QEvent *ev)
 {
     Q_D(FramelessHelper);
 
-    if (ev->type() == QEvent::WinIdChange) {
+    if (ev->type() == QEvent::WindowStateChange) {
+        bool maximized = d->window->windowState() & Qt::WindowMaximized;
+        if (maximized != d->maximized) {
+            d->maximized = maximized;
+            emit maximizedChanged(maximized);
+        }
+    } else if (ev->type() == QEvent::WinIdChange) {
         if (nullptr == d->helper) {
             auto w = d->window->windowHandle();
 
@@ -183,6 +199,7 @@ FramelessHelperPrivate::FramelessHelperPrivate()
     : window(nullptr)
     , helper(nullptr)
     , titleBarHeight(0)
+    , maximized(false)
 {
 }
 

@@ -14,9 +14,10 @@ Window {
     FramelessHelper {
         id: framelessHelper
 
+        titleBarHeight: 60
+
         Component.onCompleted: {
             addIncludeItem(titleBar)
-            setTitleBarHeight(60)
             addExcludeItem(controls)
         }
     }
@@ -79,7 +80,7 @@ Window {
             }
         }
         MaximizeButton {
-            isMaximized: Window.Maximized === window.visibility
+            maximized: Window.Maximized === window.visibility
             onClicked: {
                 framelessHelper.triggerMaximizeButtonAction();
             }
