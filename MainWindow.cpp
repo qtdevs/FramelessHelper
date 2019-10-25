@@ -44,6 +44,13 @@ void MainWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     QImage backgroundImage(QStringLiteral(":/res/background.png"));
     painter.drawImage(contentsRect(), backgroundImage);
+
+    /*
+    painter.setPen(Qt::red);
+    painter.drawRect(rect().adjusted(0, 0, -1, -1));
+    painter.setPen(Qt::blue);
+    painter.drawRect(rect().adjusted(4, 4, -5, -5));
+    */
 }
 
 bool MainWindow::event(QEvent *event)

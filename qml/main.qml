@@ -26,6 +26,35 @@ Window {
         source: "qrc:/res/background.png"
     }
 
+    /*
+    Rectangle {
+        anchors {
+            fill: parent
+        }
+
+        color: "transparent"
+
+        border {
+            width: 1
+            color: "red"
+        }
+    }
+
+    Rectangle {
+        anchors {
+            fill: parent
+            margins: 4
+        }
+
+        color: "transparent"
+
+        border {
+            width: 1
+            color: "blue"
+        }
+    }
+    */
+
     Item {
         id: titleBar
         anchors {

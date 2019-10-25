@@ -26,6 +26,11 @@ public:
     NativeWindowTester *tester;
 public:
     HWND oldWindow;
+
+public:
+    QRect availableGeometry() const;
+public:
+    qreal scaleFactor;
 };
 
 #endif // NATIVEWINDOWHELPER_P_H

@@ -34,6 +34,8 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
             d->window->installEventFilter(this);
             d->updateWindowStyle();
         }
+
+        d->scaleFactor = d->window->screen()->devicePixelRatio();
     }
 }
 
@@ -53,6 +55,8 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window)
             d->window->installEventFilter(this);
             d->updateWindowStyle();
         }
+
+        d->scaleFactor = d->window->screen()->devicePixelRatio();
     }
 }
 
@@ -82,46 +86,35 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
     } else if (WM_NCCALCSIZE == lpMsg->message) {
         if (TRUE == wParam) {
             if (d->isMaximized()) {
-                QMargins maximizedMargins
-                        = d->maximizedMargins();
-
-                QScreen *screen = d->window->screen();
-                QRect g = screen->availableGeometry();
-
                 NCCALCSIZE_PARAMS &params = *reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
 
-                params.rgrc[0].top = g.top() - maximizedMargins.top();
-                params.rgrc[0].left = g.left() - maximizedMargins.left();
-                params.rgrc[0].right = g.right() + maximizedMargins.right() + 1;
-                params.rgrc[0].bottom = g.bottom() + maximizedMargins.bottom() + 1;
+                QRect g = d->availableGeometry();
+                QMargins m = d->maximizedMargins();
+
+                params.rgrc[0].top = g.top() - m.top();
+                params.rgrc[0].left = g.left() - m.left();
+                params.rgrc[0].right = g.right() + m.right() + 1;
+                params.rgrc[0].bottom = g.bottom() + m.bottom() + 1;
             }
 
             if (result) *result = 0;
             return true;
         }
     } else if (WM_GETMINMAXINFO == lpMsg->message) {
-        QMargins maximizedMargins
-                = d->maximizedMargins();
+        LPMINMAXINFO lpMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
 
-        QScreen *screen = d->window->screen();
-        QRect g = screen->availableGeometry();
+        QRect g = d->availableGeometry();
+        QMargins m = d->maximizedMargins();
 
-        int top = g.top() - maximizedMargins.top();
-        int left = g.left() - maximizedMargins.left();
-        int right = g.right() + maximizedMargins.right();
-        int bottom = g.bottom() + maximizedMargins.bottom();
+        lpMinMaxInfo->ptMaxPosition.x = - m.left();
+        lpMinMaxInfo->ptMaxPosition.y =  - m.top();
+        lpMinMaxInfo->ptMaxSize.x = g.right() - g.left() + 1 + m.left() + m.right();
+        lpMinMaxInfo->ptMaxSize.y = g.bottom() - g.top() + 1 + m.top() + m.bottom();
 
-        LPMINMAXINFO lpMMInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
-
-        lpMMInfo->ptMaxPosition.x = - maximizedMargins.left();
-        lpMMInfo->ptMaxPosition.y =  - maximizedMargins.top();
-        lpMMInfo->ptMaxSize.x = right - left + 1;
-        lpMMInfo->ptMaxSize.y = bottom - top + 1;
-
-        lpMMInfo->ptMinTrackSize.x = d->window->minimumWidth();
-        lpMMInfo->ptMinTrackSize.y = d->window->minimumHeight();
-        lpMMInfo->ptMaxTrackSize.x = d->window->maximumWidth();
-        lpMMInfo->ptMaxTrackSize.y = d->window->maximumHeight();
+        lpMinMaxInfo->ptMinTrackSize.x = d->window->minimumWidth();
+        lpMinMaxInfo->ptMinTrackSize.y = d->window->minimumHeight();
+        lpMinMaxInfo->ptMaxTrackSize.x = d->window->maximumWidth();
+        lpMinMaxInfo->ptMaxTrackSize.y = d->window->maximumHeight();
 
         if (result) *result = 0;
         return true;
@@ -133,6 +126,22 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
             if (result) *result = 0;
             return true;
         }
+    } else if (WM_DPICHANGED == lpMsg->message) {
+        if (HIWORD(wParam) < 144) {
+            d->scaleFactor = 1.0;
+        } else {
+            d->scaleFactor = 2.0;
+        }
+
+        auto hWnd = reinterpret_cast<HWND>(d->window->winId());
+        auto rect = reinterpret_cast<LPRECT>(lParam);
+        SetWindowPos(hWnd,
+                     NULL,
+                     rect->left,
+                     rect->top,
+                     rect->right - rect->left,
+                     rect->bottom - rect->top,
+                     SWP_NOZORDER | SWP_NOACTIVATE);
     }
 
     return false;
@@ -158,6 +167,7 @@ NativeWindowHelperPrivate::NativeWindowHelperPrivate()
     , window(nullptr)
     , tester(nullptr)
     , oldWindow(NULL)
+    , scaleFactor(1.0)
 {
 }
 
@@ -291,10 +301,25 @@ bool NativeWindowHelperPrivate::isMaximized() const
 
 QMargins NativeWindowHelperPrivate::draggableMargins() const
 {
-    return tester ? tester->draggableMargins() : QMargins();
+    return tester ? tester->draggableMargins() * scaleFactor : QMargins();
 }
 
 QMargins NativeWindowHelperPrivate::maximizedMargins() const
 {
-    return tester ? tester->maximizedMargins() : QMargins();
+    return tester ? tester->maximizedMargins() * scaleFactor : QMargins();
+}
+
+QRect NativeWindowHelperPrivate::availableGeometry() const
+{
+    MONITORINFO mi{0};
+    mi.cbSize = sizeof(MONITORINFO);
+
+    auto hWnd = reinterpret_cast<HWND>(window->winId());
+    auto hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    if (!hMonitor || !GetMonitorInfoW(hMonitor, &mi)) {
+        Q_ASSERT(NULL != hMonitor);
+        return window->screen()->availableGeometry();
+    }
+
+    return QRect(mi.rcWork.left, mi.rcWork.top, mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top);
 }
