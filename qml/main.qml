@@ -1,6 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Window 2.2
 import QtShark.Window 1.0
+import QtQuick.Controls 2.5
 
 Window {
     id: window
@@ -27,78 +28,12 @@ Window {
         source: "qrc:/res/background.png"
     }
 
-    /*
-    Rectangle {
-        anchors {
-            fill: parent
-        }
-
-        color: "transparent"
-
-        border {
-            width: 1
-            color: "red"
-        }
-    }
-
-    Rectangle {
-        anchors {
-            fill: parent
-            margins: 4
-        }
-
-        color: "transparent"
-
-        border {
-            width: 1
-            color: "blue"
-        }
-    }
-    */
-
-    Item {
-        id: titleBar
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-        }
-
-        height: 26
-    }
-
-    Row {
-        id: controls
-        anchors {
-            top: titleBar.top
-            right: titleBar.right
-        }
-
-        MinimizeButton {
-            onClicked: {
-                framelessHelper.triggerMinimizeButtonAction();
-            }
-        }
-        MaximizeButton {
-            maximized: Window.Maximized === window.visibility
-            onClicked: {
-                framelessHelper.triggerMaximizeButtonAction();
-            }
-        }
-        CloseButton {
-            onClicked: {
-                framelessHelper.triggerCloseButtonAction();
-            }
-        }
-    }
 
     Text {
-        anchors {
-            top: titleBar.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
+        id: txt
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        anchors.verticalCenter: parent.verticalCenter
 
         text: "Qt Quick Inside"
         font {
@@ -107,8 +42,52 @@ Window {
         }
         color: "#fefefe"
 
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
+    }
+
+    Row {
+        id: colorPicker
+        width: parent.width
+        anchors.top: txt.bottom
+        anchors.topMargin: 20
+        Slider {
+            id: sr
+            from: 0
+            to: 1
+            value: 0
+            width: (parent.width - 20)/3
+        }
+        Slider {
+            id: sg
+            from: 0
+            to: 1
+            value: 0
+            width: (parent.width - 20)/3
+
+        }
+        Slider {
+            id: sb
+            from: 0
+            to: 1
+            value: 0
+            width: (parent.width - 20)/3
+
+        }
+
+    }
+
+
+    CustomTitleBar {
+        id: titleBar
+    }
+
+    WindowBorder {
+        foregroundColor: Qt.rgba(sr.value,sg.value,sb.value,1)
+    }
+
+    ThreeButtons {
+        id: controls
+        helper: framelessHelper
+        color: Qt.rgba(sr.value,sg.value,sb.value,1)
     }
 
     Component.onCompleted: {

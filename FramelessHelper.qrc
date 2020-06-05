@@ -1,14 +1,21 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/close-button1.png</file>
-        <file>res/close-button2.png</file>
-        <file>res/maximize-button1.png</file>
-        <file>res/maximize-button2.png</file>
-        <file>res/minimize-button1.png</file>
         <file>res/background.png</file>
         <file>qml/main.qml</file>
         <file>qml/CloseButton.qml</file>
         <file>qml/MaximizeButton.qml</file>
         <file>qml/MinimizeButton.qml</file>
+        <file>res/close-button1.svg</file>
+        <file>res/maximize-button1.svg</file>
+        <file>res/maximize-button2.svg</file>
+        <file>res/minimize-button1.svg</file>
+        <file>qml/CustomTitleBar.qml</file>
+        <file>qml/ThreeButtons.qml</file>
+        <file>qml/WindowBorder.qml</file>
+        <file>res/close-button1.png</file>
+        <file>res/close-button2.png</file>
+        <file>res/maximize-button1.png</file>
+        <file>res/maximize-button2.png</file>
+        <file>res/minimize-button1.png</file>
     </qresource>
 </RCC>

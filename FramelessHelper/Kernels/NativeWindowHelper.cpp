@@ -13,6 +13,12 @@
 
 #include "NativeWindowFilter.h"
 
+#if defined(__GNUC__)
+//我电脑上的mingw报错，说没定义，那咋就给它定义一个
+//make mingw happy
+#define WM_DPICHANGED       0x02E0
+#endif
+
 // class NativeWindowHelper
 
 NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *tester)
