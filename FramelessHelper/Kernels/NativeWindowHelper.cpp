@@ -275,6 +275,9 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
         }
     }
 
+    int x_prev = x;
+    int y_prev = y;
+
     x = x - screen_geometry.left();
     y = y - screen_geometry.top();
 
@@ -324,7 +327,7 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
-    auto pos = window->mapFromGlobal(QPoint(x, y));
+    auto pos = window->mapFromGlobal(QPoint(x_prev * ratio, y_prev * ratio));
     return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
 }
 
