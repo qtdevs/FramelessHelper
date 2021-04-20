@@ -5,6 +5,7 @@
 #include <windowsx.h>
 #include <winuser.h>
 
+#include <QGuiApplication>
 #include <QScreen>
 #include <QEvent>
 #include <QtWin>
@@ -249,8 +250,33 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
-    x = x / window->devicePixelRatio();
-    y = y / window->devicePixelRatio();
+    int ratio = window->devicePixelRatio();
+
+    QList <QScreen*> screens = QGuiApplication::screens();
+
+    auto screen_geometry = screens[0]->geometry();
+    if (QGuiApplication::screenAt(QPoint(x, y)) != screens[0])
+    {
+        for (int i = 1; i < screens.length(); i++)
+        {
+            auto geometry_tmp = screens[i]->geometry();
+
+            int delta_x = geometry_tmp.right() - geometry_tmp.left();
+            int delta_y = geometry_tmp.bottom() - geometry_tmp.top();
+
+            if (x >= geometry_tmp.left()
+                    && x <= (geometry_tmp.left() + delta_x * ratio)
+                    && y >= geometry_tmp.top()
+                    && y <= (geometry_tmp.top() + delta_y * ratio)
+               ){
+                screen_geometry = geometry_tmp;
+                break;
+            }
+        }
+    }
+
+    x = x - screen_geometry.left();
+    y = y - screen_geometry.top();
 
     enum RegionMask {
         Client = 0x0000,
@@ -279,10 +305,10 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
         bottom = GetSystemMetrics(SM_CYFRAME);
 
     auto result =
-            (Top *    (y < (wfg.top() +    top))) |
-            (Left *   (x < (wfg.left() +   left))) |
-            (Right *  (x > (wfg.right() -  right))) |
-            (Bottom * (y > (wfg.bottom() - bottom)));
+            (Top *    (y < ((wfg.top() - screen_geometry.top())    * ratio +    top))) |
+            (Left *   (x < ((wfg.left() - screen_geometry.left())  * ratio +   left))) |
+            (Right *  (x > ((wfg.right() - screen_geometry.left()) * ratio -  right))) |
+            (Bottom * (y > ((wfg.bottom() - screen_geometry.top()) * ratio - bottom)));
 
     bool wResizable = window->minimumWidth() < window->maximumWidth();
     bool hResizable = window->minimumHeight() < window->maximumHeight();
