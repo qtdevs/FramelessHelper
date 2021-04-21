@@ -44,6 +44,11 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
             d->updateWindowStyle();
         }
     }
+
+    QObject::connect(d->window, &QWindow::screenChanged, d->window, [=](QScreen *screen){
+        Q_UNUSED(screen);
+        d->window->resize(d->window->size());
+    });
 }
 
 NativeWindowHelper::NativeWindowHelper(QWindow *window)
