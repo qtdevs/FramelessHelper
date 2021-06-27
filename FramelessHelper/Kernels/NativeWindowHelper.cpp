@@ -44,11 +44,6 @@ NativeWindowHelper::NativeWindowHelper(QWindow *window, NativeWindowTester *test
             d->updateWindowStyle();
         }
     }
-
-    QObject::connect(d->window, &QWindow::screenChanged, d->window, [=](QScreen *screen){
-        Q_UNUSED(screen);
-        d->window->resize(d->window->size());
-    });
 }
 
 NativeWindowHelper::NativeWindowHelper(QWindow *window)
@@ -86,9 +81,11 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
     WPARAM wParam = lpMsg->wParam;
     LPARAM lParam = lpMsg->lParam;
 
+    QPoint pos = QCursor::pos();
+
     if (WM_NCHITTEST == lpMsg->message) {
-        *result = d->hitTest(GET_X_LPARAM(lParam),
-                             GET_Y_LPARAM(lParam));
+        *result = d->hitTest(pos.x(),
+                             pos.y());
         return true;
     } else if (WM_NCACTIVATE == lpMsg->message) {
         if (!QtWin::isCompositionEnabled()) {
@@ -255,36 +252,7 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
-    int ratio = window->devicePixelRatio();
-
-    QList <QScreen*> screens = QGuiApplication::screens();
-
-    auto screen_geometry = screens[0]->geometry();
-    if (QGuiApplication::screenAt(QPoint(x, y)) != screens[0])
-    {
-        for (int i = 1; i < screens.length(); i++)
-        {
-            auto geometry_tmp = screens[i]->geometry();
-
-            int delta_x = geometry_tmp.right() - geometry_tmp.left();
-            int delta_y = geometry_tmp.bottom() - geometry_tmp.top();
-
-            if (x >= geometry_tmp.left()
-                    && x <= (geometry_tmp.left() + delta_x * ratio)
-                    && y >= geometry_tmp.top()
-                    && y <= (geometry_tmp.top() + delta_y * ratio)
-               ){
-                screen_geometry = geometry_tmp;
-                break;
-            }
-        }
-    }
-
-    int x_prev = x;
-    int y_prev = y;
-
-    x = x - screen_geometry.left();
-    y = y - screen_geometry.top();
+    QPoint pos_global = QPoint(x, y);
 
     enum RegionMask {
         Client = 0x0000,
@@ -294,7 +262,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
         Bottom = 0x1000,
     };
 
-    auto wfg = window->frameGeometry();
     QMargins draggableMargins
             = this->draggableMargins();
 
@@ -312,11 +279,14 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     if (bottom <= 0)
         bottom = GetSystemMetrics(SM_CYFRAME);
 
+    auto pos = window->mapFromGlobal(pos_global);
+    auto wfg = window->geometry();
+
     auto result =
-            (Top *    (y < ((wfg.top() - screen_geometry.top())    * ratio +    top))) |
-            (Left *   (x < ((wfg.left() - screen_geometry.left())  * ratio +   left))) |
-            (Right *  (x > ((wfg.right() - screen_geometry.left()) * ratio -  right))) |
-            (Bottom * (y > ((wfg.bottom() - screen_geometry.top()) * ratio - bottom)));
+                (Left *   (pos.x()          <= left)       ) |
+                (Right *  (pos.x() + right  >= wfg.width())) |
+                (Top *    (pos.y()          <= top)        ) |
+                (Bottom * (pos.y() + bottom >= wfg.height()));
 
     bool wResizable = window->minimumWidth() < window->maximumWidth();
     bool hResizable = window->minimumHeight() < window->maximumHeight();
@@ -332,7 +302,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
-    auto pos = window->mapFromGlobal(QPoint(x_prev * ratio, y_prev * ratio));
     return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
 }
 
