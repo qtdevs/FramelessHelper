@@ -5,6 +5,7 @@
 #include <windowsx.h>
 #include <winuser.h>
 
+#include <QGuiApplication>
 #include <QScreen>
 #include <QEvent>
 #include <QtWin>
@@ -80,9 +81,11 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
     WPARAM wParam = lpMsg->wParam;
     LPARAM lParam = lpMsg->lParam;
 
+    QPoint pos = QCursor::pos();
+
     if (WM_NCHITTEST == lpMsg->message) {
-        *result = d->hitTest(GET_X_LPARAM(lParam),
-                             GET_Y_LPARAM(lParam));
+        *result = d->hitTest(pos.x(),
+                             pos.y());
         return true;
     } else if (WM_NCACTIVATE == lpMsg->message) {
         if (!QtWin::isCompositionEnabled()) {
@@ -249,8 +252,7 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
-    x = x / window->devicePixelRatio();
-    y = y / window->devicePixelRatio();
+    QPoint pos_global = QPoint(x, y);
 
     enum RegionMask {
         Client = 0x0000,
@@ -260,7 +262,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
         Bottom = 0x1000,
     };
 
-    auto wfg = window->frameGeometry();
     QMargins draggableMargins
             = this->draggableMargins();
 
@@ -278,11 +279,14 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     if (bottom <= 0)
         bottom = GetSystemMetrics(SM_CYFRAME);
 
+    auto pos = window->mapFromGlobal(pos_global);
+    auto wfg = window->geometry();
+
     auto result =
-            (Top *    (y < (wfg.top() +    top))) |
-            (Left *   (x < (wfg.left() +   left))) |
-            (Right *  (x > (wfg.right() -  right))) |
-            (Bottom * (y > (wfg.bottom() - bottom)));
+                (Left *   (pos.x()          <= left)       ) |
+                (Right *  (pos.x() + right  >= wfg.width())) |
+                (Top *    (pos.y()          <= top)        ) |
+                (Bottom * (pos.y() + bottom >= wfg.height()));
 
     bool wResizable = window->minimumWidth() < window->maximumWidth();
     bool hResizable = window->minimumHeight() < window->maximumHeight();
@@ -298,7 +302,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
-    auto pos = window->mapFromGlobal(QPoint(x, y));
     return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
 }
 
