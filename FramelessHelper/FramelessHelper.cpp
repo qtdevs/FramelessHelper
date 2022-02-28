@@ -219,7 +219,8 @@ QMargins FramelessHelperPrivate::maximizedMargins() const
 
 bool FramelessHelperPrivate::hitTest(const QPoint &pos) const
 {
-    int scaledTitleBarHeight = titleBarHeight * helper->scaleFactor();
+    // Works fine with any scale without scaleFactor so far
+    int scaledTitleBarHeight = titleBarHeight /*/ helper->scaleFactor()*/;
 
     if (!window)
         return false;
@@ -251,7 +252,8 @@ bool FramelessHelperPrivate::hitTest(const QPoint &pos) const
 
         if (includeItems.contains(child)) {
             break;
-        } else if (excludeItems.contains(child)) {
+        } else if (excludeItems.contains(child) || excludeItems.contains(child->parentWidget())) {
+            // child->parentWidget() fixed issue with toolbar, not sure about side effects
             return false;
         } else if (window == child) {
             break;

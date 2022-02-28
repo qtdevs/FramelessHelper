@@ -98,10 +98,12 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                 NCCALCSIZE_PARAMS &params = *reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
 
                 QRect g = d->availableGeometry();
+                g.setWidth(g.width() * d->scaleFactor);
+                g.setHeight(g.height() * d->scaleFactor);
                 QMargins m = d->maximizedMargins();
 
-                params.rgrc[0].top = g.top() - m.top();
-                params.rgrc[0].left = g.left() - m.left();
+                params.rgrc[0].top = g.top() - m.top() - 1;
+                params.rgrc[0].left = g.left() - m.left() - 1;
                 params.rgrc[0].right = g.right() + m.right() + 1;
                 params.rgrc[0].bottom = g.bottom() + m.bottom() + 1;
             }
@@ -113,6 +115,8 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
         LPMINMAXINFO lpMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
 
         QRect g = d->availableGeometry();
+        g.setWidth(g.width() * d->scaleFactor);
+        g.setHeight(g.height() * d->scaleFactor);
         QMargins m = d->maximizedMargins();
 
         lpMinMaxInfo->ptMaxPosition.x = - m.left();
@@ -156,6 +160,18 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                      rect->right - rect->left,
                      rect->bottom - rect->top,
                      SWP_NOZORDER | SWP_NOACTIVATE);
+    } else if (WM_MOVE == lpMsg->message) {
+        // Update window pos on move
+        auto hWnd = reinterpret_cast<HWND>(d->window->winId());
+        RECT rcClient;
+        GetWindowRect(hWnd, &rcClient);
+        SetWindowPos(hWnd,
+                     NULL,
+                     rcClient.left,
+                     rcClient.top,
+                     rcClient.right - rcClient.left,
+                     rcClient.bottom - rcClient.top,
+                     SWP_FRAMECHANGED);
     }
 
     return false;
@@ -332,15 +348,7 @@ QMargins NativeWindowHelperPrivate::maximizedMargins() const
 
 QRect NativeWindowHelperPrivate::availableGeometry() const
 {
-    MONITORINFO mi{0};
-    mi.cbSize = sizeof(MONITORINFO);
-
-    auto hWnd = reinterpret_cast<HWND>(window->winId());
-    auto hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-    if (!hMonitor || !GetMonitorInfoW(hMonitor, &mi)) {
-        Q_ASSERT(NULL != hMonitor);
-        return window->screen()->availableGeometry();
-    }
-
-    return QRect(mi.rcWork.left, mi.rcWork.top, mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top);
+    // These changes made because MonitorFromWindow doesn't work properly
+    // on second monitor. (Blank window on maximize after minimize)
+    return window->screen()->availableGeometry();
 }
