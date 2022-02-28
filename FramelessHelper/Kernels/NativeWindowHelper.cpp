@@ -5,6 +5,7 @@
 #include <windowsx.h>
 #include <winuser.h>
 
+#include <QGuiApplication>
 #include <QScreen>
 #include <QEvent>
 #include <QtWin>
@@ -80,9 +81,11 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
     WPARAM wParam = lpMsg->wParam;
     LPARAM lParam = lpMsg->lParam;
 
+    QPoint pos = QCursor::pos();
+
     if (WM_NCHITTEST == lpMsg->message) {
-        *result = d->hitTest(GET_X_LPARAM(lParam),
-                             GET_Y_LPARAM(lParam));
+        *result = d->hitTest(pos.x(),
+                             pos.y());
         return true;
     } else if (WM_NCACTIVATE == lpMsg->message) {
         if (!QtWin::isCompositionEnabled()) {
@@ -97,8 +100,8 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                 QRect g = d->availableGeometry();
                 QMargins m = d->maximizedMargins();
 
-                params.rgrc[0].top = g.top() - m.top();
-                params.rgrc[0].left = g.left() - m.left();
+                params.rgrc[0].top = g.top() - m.top() - 1;
+                params.rgrc[0].left = g.left() - m.left() - 1;
                 params.rgrc[0].right = g.right() + m.right() + 1;
                 params.rgrc[0].bottom = g.bottom() + m.bottom() + 1;
             }
@@ -153,6 +156,18 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                      rect->right - rect->left,
                      rect->bottom - rect->top,
                      SWP_NOZORDER | SWP_NOACTIVATE);
+    } else if (WM_MOVE == lpMsg->message) {
+        // Update window pos on move
+        auto hWnd = reinterpret_cast<HWND>(d->window->winId());
+        RECT rcClient;
+        GetWindowRect(hWnd, &rcClient);
+        SetWindowPos(hWnd,
+                     NULL,
+                     rcClient.left,
+                     rcClient.top,
+                     rcClient.right - rcClient.left,
+                     rcClient.bottom - rcClient.top,
+                     SWP_FRAMECHANGED);
     }
 
     return false;
@@ -249,8 +264,7 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
 {
     Q_CHECK_PTR(window);
 
-    x = x / window->devicePixelRatio();
-    y = y / window->devicePixelRatio();
+    QPoint pos_global = QPoint(x, y);
 
     enum RegionMask {
         Client = 0x0000,
@@ -260,7 +274,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
         Bottom = 0x1000,
     };
 
-    auto wfg = window->frameGeometry();
     QMargins draggableMargins
             = this->draggableMargins();
 
@@ -278,11 +291,14 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     if (bottom <= 0)
         bottom = GetSystemMetrics(SM_CYFRAME);
 
+    auto pos = window->mapFromGlobal(pos_global);
+    auto wfg = window->geometry();
+
     auto result =
-            (Top *    (y < (wfg.top() +    top))) |
-            (Left *   (x < (wfg.left() +   left))) |
-            (Right *  (x > (wfg.right() -  right))) |
-            (Bottom * (y > (wfg.bottom() - bottom)));
+                (Left *   (pos.x()          <= left)       ) |
+                (Right *  (pos.x() + right  >= wfg.width())) |
+                (Top *    (pos.y()          <= top)        ) |
+                (Bottom * (pos.y() + bottom >= wfg.height()));
 
     bool wResizable = window->minimumWidth() < window->maximumWidth();
     bool hResizable = window->minimumHeight() < window->maximumHeight();
@@ -298,7 +314,6 @@ int NativeWindowHelperPrivate::hitTest(int x, int y) const
     case Left          : return wResizable               ? HTLEFT        : HTCLIENT;
     }
 
-    auto pos = window->mapFromGlobal(QPoint(x, y));
     return ((nullptr != tester) && !tester->hitTest(pos)) ? HTCLIENT : HTCAPTION;
 }
 
@@ -329,15 +344,7 @@ QMargins NativeWindowHelperPrivate::maximizedMargins() const
 
 QRect NativeWindowHelperPrivate::availableGeometry() const
 {
-    MONITORINFO mi{0};
-    mi.cbSize = sizeof(MONITORINFO);
-
-    auto hWnd = reinterpret_cast<HWND>(window->winId());
-    auto hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-    if (!hMonitor || !GetMonitorInfoW(hMonitor, &mi)) {
-        Q_ASSERT(NULL != hMonitor);
-        return window->screen()->availableGeometry();
-    }
-
-    return QRect(mi.rcWork.left, mi.rcWork.top, mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top);
+    // These changes made because MonitorFromWindow doesn't work properly
+    // on second monitor. (Blank window on maximize after minimize)
+    return window->screen()->availableGeometry();
 }
