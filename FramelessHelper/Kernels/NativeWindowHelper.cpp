@@ -98,8 +98,6 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
                 NCCALCSIZE_PARAMS &params = *reinterpret_cast<NCCALCSIZE_PARAMS *>(lParam);
 
                 QRect g = d->availableGeometry();
-                g.setWidth(g.width() * d->scaleFactor);
-                g.setHeight(g.height() * d->scaleFactor);
                 QMargins m = d->maximizedMargins();
 
                 params.rgrc[0].top = g.top() - m.top() - 1;
@@ -115,8 +113,6 @@ bool NativeWindowHelper::nativeEventFilter(void *msg, long *result)
         LPMINMAXINFO lpMinMaxInfo = reinterpret_cast<LPMINMAXINFO>(lParam);
 
         QRect g = d->availableGeometry();
-        g.setWidth(g.width() * d->scaleFactor);
-        g.setHeight(g.height() * d->scaleFactor);
         QMargins m = d->maximizedMargins();
 
         lpMinMaxInfo->ptMaxPosition.x = - m.left();
